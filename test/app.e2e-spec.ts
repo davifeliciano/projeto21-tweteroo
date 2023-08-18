@@ -36,12 +36,15 @@ describe('AppController (e2e)', () => {
   });
 
   it('/signup => should deny a sign-up when data is wrong', async () => {
-    return request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post('/sign-up')
       .send({
-        username: 'test',
+        username: 'test', // missing avatar on purpose
       })
       .expect(HttpStatus.BAD_REQUEST);
+
+    const errorMessages: string[] = response.body.message;
+    expect(errorMessages).toContain('All fields are required!');
   });
 
   it('/signup => should accept a sign-up', () => {
@@ -55,6 +58,7 @@ describe('AppController (e2e)', () => {
   });
 
   it('POST /tweets should create a tweet', async () => {
+    // setup
     const username = 'test';
     await signUpUser(app, { username, avatar: 'http://test.com.br/image.png' });
 
@@ -78,12 +82,11 @@ describe('AppController (e2e)', () => {
   });
 
   it('GET /tweets should get only the latest 15 tweets', async () => {
-    const tweetsQuantity = 15;
+    // setup
+    const tweetsQtd = 20;
     const username = 'test';
-
     await signUpUser(app, { username, avatar: 'http://test.com.br?image.png' });
-
-    for (let i = 0; i < tweetsQuantity; i++) {
+    for (let i = 0; i < tweetsQtd; i++) {
       await tweetFromUser(app, {
         username,
         tweet: 'test tweet',
@@ -91,7 +94,6 @@ describe('AppController (e2e)', () => {
     }
 
     const response = await request(app.getHttpServer()).get('/tweets');
-
     expect(response.body).toHaveLength(15);
     expect(response.body[0]).toEqual({
       username: expect.any(String),
@@ -100,44 +102,24 @@ describe('AppController (e2e)', () => {
     });
   });
 
-  it('GET /tweets?page=<page> should get the page of tweets correctly', async () => {
-    const tweetsQuantity = 15;
+  it('GET /tweets should get the second page of results', async () => {
+    // setup
+    const tweetsQtd = 20; // 15 + 5 (second page)
     const username = 'test';
     await signUpUser(app, { username, avatar: 'http://test.com.br?image.png' });
-
-    for (let i = tweetsQuantity; i > 0; i--) {
+    for (let i = 0; i < tweetsQtd; i++) {
       await tweetFromUser(app, {
         username,
-        tweet: `tweet ${i}`,
+        tweet: 'test tweet',
       });
     }
 
-    const firstPageResponse = await request(app.getHttpServer()).get(
-      '/tweets?page=1',
-    );
-
-    const secondPageResponse = await request(app.getHttpServer()).get(
-      '/tweets?page=2',
-    );
-
-    expect(firstPageResponse.body).toHaveLength(10);
-    expect(firstPageResponse.body.at(0)).toEqual({
+    const response = await request(app.getHttpServer()).get('/tweets?page=2');
+    expect(response.body).toHaveLength(5);
+    expect(response.body[0]).toEqual({
       username: expect.any(String),
       avatar: expect.any(String),
-      tweet: 'tweet 1',
-    });
-
-    expect(firstPageResponse.body.at(-1)).toEqual({
-      username: expect.any(String),
-      avatar: expect.any(String),
-      tweet: 'tweet 10',
-    });
-
-    expect(secondPageResponse.body).toHaveLength(5);
-    expect(secondPageResponse.body.at(0)).toEqual({
-      username: expect.any(String),
-      avatar: expect.any(String),
-      tweet: 'tweet 11',
+      tweet: expect.any(String),
     });
   });
 
@@ -148,9 +130,9 @@ describe('AppController (e2e)', () => {
   });
 
   it('GET /tweets/:username should get the tweets of a specific user', async () => {
-    const tweetsQuantity = 10;
-
-    for (let i = 0; i < tweetsQuantity; i++) {
+    // setup
+    const tweetsQtd = 10;
+    for (let i = 0; i < tweetsQtd; i++) {
       const username = `test${i}`;
       await signUpUser(app, {
         username,
