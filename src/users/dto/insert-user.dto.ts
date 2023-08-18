@@ -1,10 +1,10 @@
 import { IsNotEmpty, IsUrl } from 'class-validator';
 
 export class InsertUserDto {
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'All fields are required!' })
   username: string;
 
-  @IsNotEmpty()
+  @IsNotEmpty({ message: 'All fields are required!' })
   @IsUrl()
   avatar: string;
 }

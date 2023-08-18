@@ -12,7 +12,7 @@ function tweetMapper(tweet: Tweet) {
 @Injectable()
 export class TweetsService {
   private readonly tweets: Tweet[] = [];
-  private readonly TWEETS_PER_PAGE: number = 10;
+  private readonly TWEETS_PER_PAGE: number = 15;
   private readonly TWEETS_IF_NO_PAGE: number = 15;
 
   insert(tweet: Tweet) {
