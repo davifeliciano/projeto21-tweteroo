@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { TweetsService } from './tweets.service';
 import { InsertTweetDto } from './dto/insert-tweet.dto';
-import { UsersService } from 'src/users/users.service';
+import { UsersService } from '../users/users.service';
 import { PageDto } from './dto/page.dto';
 
 @Controller('tweets')
