@@ -5,6 +5,6 @@ export class InsertUserDto {
   username: string;
 
   @IsNotEmpty()
-  @IsUrl()
+  @IsUrl({ require_protocol: true })
   avatar: string;
 }
